@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "@langchain/openai": "^0.0.28",
+    "@upstash/vector": "^1.0.5",
+    "hono": "^4.2.3",
+    "langchain": "^0.1.33",
+    "natural": "^7.0.0",
+    "pdf-text-reader": "^4.0.1",
+    "replicate": "^0.29.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
