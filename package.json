@@ -4,7 +4,9 @@
   },
   "dependencies": {
     "@langchain/openai": "^0.0.28",
+    "@libsql/client": "^0.6.0",
     "@upstash/vector": "^1.0.5",
+    "drizzle-orm": "^0.30.8",
     "hono": "^4.2.3",
     "langchain": "^0.1.33",
     "natural": "^7.0.0",
@@ -12,6 +14,7 @@
     "replicate": "^0.29.1"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.20.14"
   }
 }
