@@ -9,13 +9,20 @@ export const users = sqliteTable('users', {
     .notNull(),
 });
 
-export const posts = sqliteTable('posts', {
+export const posts = sqliteTable('topics', {
   id: integer('id').primaryKey(),
-  title: text('title').notNull(),
-  content: text('content').notNull(),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, {onDelete: 'cascade'}),
+  title: text('title').notNull(),
+  /* 
+    questionsAndAnswers = [
+        { question: 'What is the capital of France?', answer: 'Paris' },
+        { question: 'What is the largest planet in our solar system?', answer: 'Jupiter' },
+        // ... more question-answer objects
+    ];
+  */
+  questionsAndAnswers: text('questions_and_answers').notNull(),
   createdAt: text('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
