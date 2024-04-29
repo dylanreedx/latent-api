@@ -1,9 +1,8 @@
 import {Hono} from 'hono';
 import {Index} from '@upstash/vector';
-import {extractTextFromPDF} from './utils/extract-text-from-pdf';
-import * as natural from 'natural';
-import {ChatOpenAI, OpenAIEmbeddings} from '@langchain/openai';
 import Replicate from 'replicate';
+import {convertToJSON} from './utils/convert-to-json';
+import {getEmbedding} from './utils/get-embedding';
 const replicate = new Replicate({
   auth: process.env.REPLICATE_AUTH,
 });
@@ -12,68 +11,6 @@ const index = new Index({
   url: process.env.UPSTASH_URL,
   token: process.env.UPSTASH_INDEX_TOKEN,
 });
-
-function convertToJSON(questionsArray: string[]): object {
-  // Join the array elements into a single string
-  let questionsString = questionsArray.join('');
-
-  // Find the indices of the first opening and the corresponding closing bracket
-  let firstOpeningBracketIndex = questionsString.indexOf('[');
-  let firstClosingBracketIndex = questionsString.lastIndexOf(']');
-
-  // Extract the JSON substring from the first opening bracket to the corresponding closing one
-  let jsonSubstring = questionsString.substring(
-    firstOpeningBracketIndex,
-    firstClosingBracketIndex + 1
-  );
-
-  // Try to parse the JSON substring. If it fails, return an error.
-  try {
-    let formattedQuestions = JSON.parse(jsonSubstring);
-    return {questions: formattedQuestions};
-  } catch (error) {
-    console.error('Error parsing questions JSON:', error);
-    return {error: 'Failed to parse questions into JSON.'};
-  }
-}
-
-async function getEmbedding(text: string) {
-  const model = new OpenAIEmbeddings({
-    apiKey: process.env.OPENAI_API_TOKEN,
-    model: 'text-embedding-3-small',
-  });
-
-  const embedding = await model.embedQuery(text);
-  return embedding;
-}
-
-async function tokenize(text: string, pdfId: string) {
-  const tokenizer = new natural.SentenceTokenizer();
-  const chunks = tokenizer.tokenize(text);
-  const model = new OpenAIEmbeddings({
-    apiKey: process.env.OPENAI_API_TOKEN,
-    model: 'text-embedding-3-small',
-  });
-
-  let existingDoc = (await index.fetch([pdfId]))?.[0];
-  if (!existingDoc) {
-    existingDoc = {id: pdfId, metadata: {text: []}, vector: []};
-  }
-
-  for (const chunk of chunks) {
-    console.log('Chunk:', chunk);
-    const embedding = await model.embedQuery(chunk);
-    // @ts-ignore
-    existingDoc.metadata.text.push(chunk);
-    existingDoc.vector = embedding;
-
-    try {
-      await index.upsert([existingDoc]);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-}
 
 const app = new Hono();
 
@@ -172,4 +109,7 @@ app.get('/', async (c) => {
   }
 });
 
-export default app;
+export default {
+  port: 3001,
+  fetch: app.fetch,
+};
