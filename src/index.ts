@@ -132,6 +132,8 @@ app.post('/upload-pdf', async (c) => {
   const pdfFilePath = await downloadPdf(file.url, file.name);
   const {text, title} = await extractTextFromPDF(pdfFilePath, file.name);
   await EmbedAndIndexText(text, title);
+
+  return c.json({text, title});
 });
 
 export default {
