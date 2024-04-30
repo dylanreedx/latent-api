@@ -6,6 +6,7 @@
     "@langchain/openai": "^0.0.28",
     "@libsql/client": "^0.6.0",
     "@upstash/vector": "^1.0.5",
+    "axios": "^1.6.8",
     "drizzle-orm": "^0.30.8",
     "hono": "^4.2.3",
     "langchain": "^0.1.33",

@@ -3,6 +3,9 @@ import {Index} from '@upstash/vector';
 import Replicate from 'replicate';
 import {convertToJSON} from './utils/convert-to-json';
 import {getEmbedding} from './utils/get-embedding';
+import {extractTextFromPDF} from './utils/extract-text-from-pdf';
+import {EmbedAndIndexText} from './utils/embed-index-text';
+import {downloadPdf} from './utils/download-pdf';
 const replicate = new Replicate({
   auth: process.env.REPLICATE_AUTH,
 });
@@ -14,18 +17,10 @@ const index = new Index({
 
 const app = new Hono();
 
-app.get('/', async (c) => {
-  const query = c.req.query('q');
+app.post('/quiz', async (c) => {
+  const query = await c.req.text();
+  if (!query) return c.json('Query is required', 400);
   try {
-    const filePath = 'mit_lecture_4.pdf';
-
-    const filePaths = [
-      'mit_lecture_1.pdf',
-      'mit_lecture_2.pdf',
-      'mit_lecture_3.pdf',
-      'mit_lecture_4.pdf',
-    ];
-
     // const {text, title} = await extractTextFromPDF(filePath, filePath);
     // filePaths.forEach(async (filePath) => {
     //   const {text, title} = await extractTextFromPDF(filePath, filePath);
@@ -60,25 +55,25 @@ app.get('/', async (c) => {
 
     const prompt = `Using the following information:
 
-    Here is context from the student's lecture slides:
-    ${context}
+      Here is context from the student's lecture slides:
+      ${context}
 
-    Create 3 multiple-choice questions about ${query}. Each question should have 4 answer options. Format the questions and answers as a JSON array like this:
+      Create 3 multiple-choice questions about ${query}. Each question should have 4 answer options. Format the questions and answers as a JSON array like this:
 
-    [
-      {
-        "question": "...",
-        "options": [
-          "...",
-          "...",
-          "...",
-          "..."
-        ],
-        "answer": "..."
-      },
-      ...
-    ]
-`;
+      [
+        {
+          "question": "...",
+          "options": [
+            "...",
+            "...",
+            "...",
+            "..."
+          ],
+          "answer": "..."
+        },
+        ...
+      ]
+  `;
 
     const input = {
       top_p: 1,
@@ -102,11 +97,41 @@ app.get('/', async (c) => {
 
     console.log('Questions:', convertToJSON(questions as string[]));
 
-    return c.json({questions});
+    return c.json({questions: convertToJSON(questions as string[])});
   } catch (error) {
     console.error(error);
     return c.json('Failed to extract text from PDF');
   }
+});
+
+app.post('/upload-pdf', async (c) => {
+  type File = {
+    name: string;
+    url: string;
+  };
+
+  console.log('Request:', await c.req.json());
+  const file: File = await c.req.json();
+
+  // upload files to upstash
+
+  // const {name, url} = file;
+  // const response = await fetch(url);
+  // const blob = await response.blob();
+  // const urlObject = URL.createObjectURL(blob);
+  // const a = document.createElement('a');
+  // a.href = urlObject;
+  // a.download = name;
+  // a.click();
+  // URL.revokeObjectURL(urlObject);
+
+  // const {text, title} = await extractTextFromPDF(url, name);
+
+  // await EmbedAndIndexText(text, title);
+
+  const pdfFilePath = await downloadPdf(file.url, file.name);
+  const {text, title} = await extractTextFromPDF(pdfFilePath, file.name);
+  await EmbedAndIndexText(text, title);
 });
 
 export default {
