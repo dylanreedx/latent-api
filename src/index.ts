@@ -113,22 +113,6 @@ app.post('/upload-pdf', async (c) => {
   console.log('Request:', await c.req.json());
   const file: File = await c.req.json();
 
-  // upload files to upstash
-
-  // const {name, url} = file;
-  // const response = await fetch(url);
-  // const blob = await response.blob();
-  // const urlObject = URL.createObjectURL(blob);
-  // const a = document.createElement('a');
-  // a.href = urlObject;
-  // a.download = name;
-  // a.click();
-  // URL.revokeObjectURL(urlObject);
-
-  // const {text, title} = await extractTextFromPDF(url, name);
-
-  // await EmbedAndIndexText(text, title);
-
   const pdfFilePath = await downloadPdf(file.url, file.name);
   const {text, title} = await extractTextFromPDF(pdfFilePath, file.name);
   await EmbedAndIndexText(text, title);
