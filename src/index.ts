@@ -17,17 +17,14 @@ const index = new Index({
 
 const app = new Hono();
 
+app.get('/helloworld', (c) => {
+  return c.json('Hello World');
+});
+
 app.post('/quiz', async (c) => {
   const query = await c.req.text();
   if (!query) return c.json('Query is required', 400);
   try {
-    // const {text, title} = await extractTextFromPDF(filePath, filePath);
-    // filePaths.forEach(async (filePath) => {
-    //   const {text, title} = await extractTextFromPDF(filePath, filePath);
-    //   await tokenize(text, title);
-    // });
-    // await tokenize(text, title);
-
     const embedding = await getEmbedding(
       query || 'What is the capital of France?'
     );
@@ -85,16 +82,11 @@ app.post('/quiz', async (c) => {
       repetition_penalty: 1,
     };
 
-    // for await (const event of replicate.stream('meta/llama-2-7b-chat', {
-    //   input,
-    // })) {
-    //   process.stdout.write(`${event}`);
-    // }
-
     const questions = await replicate.run('meta/llama-2-7b-chat', {
       input,
     });
 
+    console.log('context used', context);
     console.log('Questions:', convertToJSON(questions as string[]));
 
     return c.json({questions: convertToJSON(questions as string[])});
@@ -110,7 +102,6 @@ app.post('/upload-pdf', async (c) => {
     url: string;
   };
 
-  console.log('Request:', await c.req.json());
   const file: File = await c.req.json();
 
   const pdfFilePath = await downloadPdf(file.url, file.name);
