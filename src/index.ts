@@ -103,6 +103,7 @@ app.post('/upload-pdf', async (c) => {
     name: string;
     url: string;
   };
+  console.log('Request:');
 
   const file: File = await c.req.json();
 
