@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {mkdir, readdir} from 'node:fs/promises';
+import {unlinkSync} from 'node:fs';
 import {EmbedAndIndexText} from './embed-index-text';
 import {extractTextFromPDF} from './extract-text-from-pdf';
 
@@ -14,6 +15,7 @@ export async function downloadPdf(url: string, name: string): Promise<string> {
 
   try {
     await Bun.write(`./tmp/${name}.pdf`, fileData);
+    unlinkSync(pdfFilePath);
     return pdfFilePath;
   } catch (error) {
     console.error('Error extracting text from PDF:', error);

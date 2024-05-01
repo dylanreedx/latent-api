@@ -13,6 +13,7 @@
     "hono": "^4.2.3",
     "langchain": "^0.1.33",
     "natural": "^7.0.0",
+    "p-queue": "^8.0.1",
     "pdf-text-reader": "^4.0.1",
     "replicate": "^0.29.1"
   },
