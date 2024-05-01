@@ -17,12 +17,6 @@ const index = new Index({
   token: process.env.UPSTASH_INDEX_TOKEN,
 });
 
-export const config: PageConfig = {
-  api: {
-    bodyParser: false,
-  },
-}
-
 const app = new Hono();
 
 app.get('/helloworld', (c) => {
@@ -112,12 +106,21 @@ app.post('/upload-pdf', async (c) => {
 
   const file: File = await c.req.json();
 
-  const pdfFilePath = await downloadPdf(file.url, file.name);
-  const {text, title} = await extractTextFromPDF(pdfFilePath, file.name);
-  await EmbedAndIndexText(text, title);
+  console.time('upload-pdf');
 
+  const pdfFilePath = await downloadPdf(file.url, file.name);
+  console.timeLog('upload-pdf', 'Downloaded PDF');
+
+  const {text, title} = await extractTextFromPDF(pdfFilePath, file.name);
+  console.timeLog('upload-pdf', 'Extracted text from PDF');
+
+  await EmbedAndIndexText(text, title);
+  console.timeLog('upload-pdf', 'Embedded and indexed text');
+
+  console.timeEnd('upload-pdf');
   return c.json({text, title});
 });
+
 
 const port = process.env.PORT || 3001
 export default {
