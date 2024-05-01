@@ -11,6 +11,7 @@
     "hono": "^4.2.3",
     "langchain": "^0.1.33",
     "natural": "^7.0.0",
+    "next": "^14.2.3",
     "pdf-text-reader": "^4.0.1",
     "replicate": "^0.29.1"
   },

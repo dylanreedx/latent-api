@@ -1,4 +1,6 @@
 import {Hono} from 'hono';
+import type { PageConfig } from 'next'
+
 import {Index} from '@upstash/vector';
 import Replicate from 'replicate';
 import {convertToJSON} from './utils/convert-to-json';
@@ -14,6 +16,12 @@ const index = new Index({
   url: process.env.UPSTASH_URL,
   token: process.env.UPSTASH_INDEX_TOKEN,
 });
+
+export const config: PageConfig = {
+  api: {
+    bodyParser: false,
+  },
+}
 
 const app = new Hono();
 
@@ -111,7 +119,8 @@ app.post('/upload-pdf', async (c) => {
   return c.json({text, title});
 });
 
+const port = process.env.PORT || 3001
 export default {
-  port: 3001,
+  port,
   fetch: app.fetch,
 };
